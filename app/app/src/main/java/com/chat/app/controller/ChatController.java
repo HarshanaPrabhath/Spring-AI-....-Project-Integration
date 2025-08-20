@@ -24,15 +24,21 @@ public class ChatController {
         // Better, structured prompt
         String customizeMSG = String.format(
                 "You are an assistant. " +
-                        "Respond to the user input with a JSON object containing:" +
-                        " 1) 'responseText': the AI's answer to the user's input," +
-                        " 2) 'data': any structured data relevant to the answer." +
-                        " Ensure the JSON is properly formatted and valid. dont include json part " +
+                        "Respond ONLY with a valid JSON object that contains exactly one field: " +
+                        "'responseText' which is the AI's answer to the user's input. " +
+                        "Do not include any extra text, explanations, or keys. " +
                         "User input: %s",
                 prompt
         );
 
         String response = chatClient.prompt().user(customizeMSG).call().content();
+
+        if (response.contains("{")) {
+            int start = response.indexOf("{");
+            int end = response.lastIndexOf("}") + 1;
+            response = response.substring(start, end);
+        }
+
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
